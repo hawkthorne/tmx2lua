@@ -1,19 +1,16 @@
-.PHONY = clean fmt
+.PHONY = clean fmt tar
 
-all: fmt build/darwin/tmx2lua build/linux/tmx2lua build/windows/tmx2lua
+all: fmt build/darwin/tmx2lua build/windows/tmx2lua build/linux/tmx2lua
 
-build/darwin/tmx2lua: tmx2lua.go
-	mkdir -p build/darwin
-	GOOS=darwin go build -o $@
+tar: all build/tmx2lua.windows.tar.gz build/tmx2lua.darwin.tar.gz build/tmx2lua.linux.tar.gz
 
-build/linux/tmx2lua: tmx2lua.go
-	mkdir -p build/linux
-	GOOS=linux GOARCH=amd64 go build -o $@
+build/%/tmx2lua: tmx2lua.go
+	mkdir -p build/$*
+	GOOS=$* GOARCH=amd64 go build -o $@
 
-build/windows/tmx2lua: tmx2lua.go
-	mkdir -p build/windows
-	GOOS=windows GOARCH=amd64 go build -o $@
-
+build/tmx2lua.%.tar.gz: build/%/tmx2lua
+	cd build/$* && tar -cf tmx2lua.$*.tar.gz tmx2lua
+	mv build/$*/tmx2lua.$*.tar.gz build
 
 fmt: 
 	go fmt tmx2lua.go
