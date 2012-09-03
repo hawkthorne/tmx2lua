@@ -1,6 +1,6 @@
-.PHONY = clean
+.PHONY = clean fmt
 
-all: build/darwin/tmx2lua build/linux/tmx2lua build/windows/tmx2lua
+all: fmt build/darwin/tmx2lua build/linux/tmx2lua build/windows/tmx2lua
 
 build/darwin/tmx2lua: tmx2lua.go
 	mkdir -p build/darwin
@@ -13,6 +13,10 @@ build/linux/tmx2lua: tmx2lua.go
 build/windows/tmx2lua: tmx2lua.go
 	mkdir -p build/windows
 	GOOS=windows GOARCH=amd64 go build -o $@
+
+
+fmt: 
+	go fmt tmx2lua.go
 
 clean: 
 	rm -rf build

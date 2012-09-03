@@ -11,8 +11,6 @@ import (
 	"text/template"
 )
 
-type empty struct{}
-
 func exportTileset(filename string, tmpl *template.Template) {
 	fmt.Printf("Processing %s\n", filename)
 
@@ -116,17 +114,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	n := len(flag.Args())
-	sem := make(chan empty, n)
-
-	for i, xi := range flag.Args() {
-		go func(i int, handle string) {
-			exportTileset(handle, tmpl)
-			sem <- empty{}
-		}(i, xi)
-	}
-
-	for i := 0; i < n; i++ {
-		<-sem
+	for _, handle := range flag.Args() {
+		exportTileset(handle, tmpl)
 	}
 }
