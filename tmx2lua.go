@@ -2,18 +2,21 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/kyleconroy/go-tmx/tmx"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"text/template"
 )
 
-func main() {
-	flag.Parse()
+type empty struct{}
 
-	handle := flag.Arg(0)
+func exportTileset(filename string, tmpl *template.Template) {
+	fmt.Printf("Processing %s\n", filename)
 
-	file, err := os.Open(handle)
+	file, err := os.Open(filename)
 
 	if err != nil {
 		log.Fatal(err)
@@ -24,6 +27,25 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	luaFilename := strings.Replace(filepath.Base(filename), filepath.Ext(filename), ".lua", 1)
+	outputPath := filepath.Join(filepath.Dir(filename), luaFilename)
+
+	output, err := os.Create(outputPath)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tmpl.Execute(output, tileset)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func main() {
+	flag.Parse()
 
 	luaTable := `return {
   width = {{.Width}},
@@ -94,9 +116,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = tmpl.Execute(os.Stdout, tileset)
+	n := len(flag.Args())
+	sem := make(chan empty, n)
 
-	if err != nil {
-		log.Fatal(err)
+	for i, xi := range flag.Args() {
+		go func(i int, handle string) {
+			exportTileset(handle, tmpl)
+			sem <- empty{}
+		}(i, xi)
+	}
+
+	for i := 0; i < n; i++ {
+		<-sem
 	}
 }
