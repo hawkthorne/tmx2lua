@@ -16,4 +16,8 @@ fmt:
 	go fmt tmx2lua.go
 
 clean: 
+	go clean
 	rm -rf build
+
+install: all
+	cp build/darwin/tmx2lua ~/bin

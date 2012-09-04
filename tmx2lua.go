@@ -77,11 +77,11 @@ func main() {
       properties = { {{range .Properties}}
         ["{{.Name}}"] = "{{.Value}}",{{end}}
       },
-      tiles = { {{range .DecodedTiles}}{id = {{.ID}},{{if .HorizontalFlip}} flipHorizontal = true,{{end}}{{if .VerticalFlip}} flipVertical = true,{{end}}{{if .DiagonalFlip}} flipDiagonal = true,{{end}}},{{end}} },
+      tiles = { {{range .DecodedTiles}}{{if .Nil}}false,{{else}}{id = {{.ID}},{{if .HorizontalFlip}} flipHorizontal = true,{{end}}{{if .VerticalFlip}} flipVertical = true,{{end}}{{if .DiagonalFlip}} flipDiagonal = true,{{end}}},{{end}}{{end}} },
     },{{end}}
   },
   objectgroups = { {{range .ObjectGroups }}
-    {
+    ["{{.Name}}"] = {
       name = "{{.Name}}",
       properties = { {{range .Properties}}
         ["{{.Name}}"] = "{{.Value}}",{{end}}
