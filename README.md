@@ -1,7 +1,7 @@
 tmx2lua
 =======
 
-Covernt TMX files into Lua scripts
+Convert TMX files into Lua scripts
 
 ## Usage
 
