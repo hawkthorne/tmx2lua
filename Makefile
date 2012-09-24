@@ -1,8 +1,8 @@
-.PHONY = clean fmt tar
+.PHONY = clean fmt tar upload
 
 all: fmt build/osx/tmx2lua build/windows32/tmx2lua.exe build/windows64/tmx2lua.exe build/linux/tmx2lua build/linux64/tmx2lua
 
-tar: all build/tmx2lua.windows32.tar.gz build/tmx2lua.windows64.tar.gz build/tmx2lua.osx.tar.gz build/tmx2lua.linux.tar.gz build/tmx2lua.linux64.tar.gz
+tar: all build/tmx2lua.osx.tar build/tmx2lua.linux.tar build/tmx2lua.linux64.tar build/tmx2lua.windows32.zip build/tmx2lua.windows64.zip
 
 build/osx/tmx2lua: tmx2lua.go
 	mkdir -p build/osx
@@ -24,16 +24,23 @@ build/windows32/tmx2lua.exe: tmx2lua.go
 	mkdir -p build/windows32
 	GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -o $@
 
-build/tmx2lua.windows%.tar.gz: build/windows%/tmx2lua.exe
-	cd build/windows$* && tar -cf tmx2lua.windows$*.tar.gz tmx2lua.exe
-	mv build/windows$*/tmx2lua.windows$*.tar.gz build
+build/tmx2lua.%.zip: build/%/tmx2lua.exe
+	cd build/$* && zip tmx2lua.$*.zip tmx2lua.exe
+	mv build/$*/tmx2lua.$*.zip build
 
-build/tmx2lua.%.tar.gz: build/%/tmx2lua
-	cd build/$* && tar -cf tmx2lua.$*.tar.gz tmx2lua
-	mv build/$*/tmx2lua.$*.tar.gz build
+build/tmx2lua.%.tar: build/%/tmx2lua
+	cd build/$* && tar -cf tmx2lua.$*.tar tmx2lua
+	mv build/$*/tmx2lua.$*.tar build
 
 fmt: 
 	go fmt tmx2lua.go
+
+upload: tar
+	python upload.py build/tmx2lua.linux.tar
+	python upload.py build/tmx2lua.linux64.tar
+	python upload.py build/tmx2lua.osx.tar
+	python upload.py build/tmx2lua.windows32.zip
+	python upload.py build/tmx2lua.windows64.zip
 
 clean: 
 	go clean
